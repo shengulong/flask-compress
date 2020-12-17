@@ -91,8 +91,13 @@ class Compress(object):
 
         if self.cache:
             key = self.cache_key(response)
-            gzip_content = self.cache.get(key) or self.compress(app, response)
-            self.cache.set(key, gzip_content)
+            try:
+                gzip_content = self.cache.get(key) or self.compress(app, response)
+                self.cache.set(key, gzip_content)
+            except:
+                # When the cache is not available, switch a non-cache mode prevent some cached pages from being unreadable
+                self.cache = None
+                gzip_content = self.compress(app, response)
         else:
             gzip_content = self.compress(app, response)
 
